@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python --version)",
+      "PowerShell(pip --version)",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"ProcessId = 32556\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\sachi\\.claude\\projects\\c--Users-sachi-OneDrive-Claude-poc-MarathiJunnerLaganaMandal\\memory"
+    ]
+  }
+}

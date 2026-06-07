@@ -1,0 +1,45 @@
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// Attach stored token on every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token')
+  if (token) config.headers['Authorization'] = `Bearer ${token}`
+  return config
+})
+
+// Auto-refresh on 401
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (refreshToken) {
+        try {
+          const res = await axios.post(
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/auth/refresh`,
+            null,
+            { params: { refresh_token: refreshToken } }
+          )
+          const { access_token } = res.data
+          localStorage.setItem('access_token', access_token)
+          original.headers['Authorization'] = `Bearer ${access_token}`
+          return api(original)
+        } catch {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          window.location.href = '/login'
+        }
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default api
