@@ -16,10 +16,15 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+# Define the origins that are allowed to see your backend
+origins = [
+    "https://junnarmandal-frontend.vercel.app",  # Your frontend production URL
+    "http://localhost:3000",                     # Highly recommended for local development
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
