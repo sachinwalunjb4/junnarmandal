@@ -21,14 +21,15 @@ origins = [
     "https://junnarmandal-frontend.vercel.app",  # Your frontend production URL
     "http://localhost:3000",                     # Highly recommended for local development
 ]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 app.include_router(auth.router)
 app.include_router(profiles.router)
