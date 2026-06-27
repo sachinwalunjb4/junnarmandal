@@ -62,6 +62,9 @@ class ProfileCreate(BaseModel):
     father_occupation: Optional[str] = None
     mother_occupation: Optional[str] = None
     siblings_count: int = 0
+    contact_name: Optional[str] = None
+    contact_type: Optional[str] = None
+    contact_mobile: Optional[str] = None
 
     @field_validator("gender")
     @classmethod
@@ -102,6 +105,9 @@ class ProfileUpdate(BaseModel):
     father_occupation: Optional[str] = None
     mother_occupation: Optional[str] = None
     siblings_count: Optional[int] = None
+    contact_name: Optional[str] = None
+    contact_type: Optional[str] = None
+    contact_mobile: Optional[str] = None
 
 
 class ProfileOut(BaseModel):
@@ -124,6 +130,9 @@ class ProfileOut(BaseModel):
     father_occupation: Optional[str]
     mother_occupation: Optional[str]
     siblings_count: int
+    contact_name: Optional[str]
+    contact_type: Optional[str]
+    contact_mobile: Optional[str]
     is_approved: bool
     last_active: Optional[datetime]
     created_at: datetime

@@ -1,27 +1,70 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useLang } from '../contexts/LangContext'
 import toast from 'react-hot-toast'
-
-const STEPS = ['Account', 'Personal', 'Education & Career', 'Family']
 
 const COMMUNITIES = [
   'Brahmin', 'Maratha', 'Mali', 'Dhangar', 'Teli', 'Chambhar', 'Mahar',
   'Buddhist (Ambedkarite)', 'Koli', 'Gujar', 'Bhandari', 'Other'
 ]
 
+const DEBUG_DATA = {
+  email: 'test@example.com',
+  password: 'Test@1234',
+  confirmPassword: 'Test@1234',
+  name: 'Ramesh Patil',
+  gender: 'male',
+  date_of_birth: '1995-06-15',
+  height_cm: '170',
+  marital_status: 'never_married',
+  mother_tongue: 'Marathi',
+  religion: 'Hindu',
+  community: 'Maratha',
+  city: 'Junnar',
+  about_me: 'मी जुन्नर येथील एक सॉफ्टवेअर अभियंता आहे. मला वाचन आणि प्रवास आवडतो.',
+  qualification: "Bachelor's Degree",
+  profession: 'Software Engineer',
+  annual_income: '₹5–10 Lakh',
+  family_type: 'joint',
+  father_occupation: 'Farmer',
+  mother_occupation: 'Homemaker',
+  siblings_count: '2',
+  contact_name: 'Suresh Patil',
+  contact_type: 'father',
+  contact_mobile: '9876543210',
+}
+
+const EMPTY_FORM = {
+  email: '', password: '', confirmPassword: '',
+  name: '', gender: '', date_of_birth: '', height_cm: '', marital_status: 'never_married',
+  mother_tongue: 'Marathi', religion: 'Hindu', community: '', city: '', about_me: '',
+  qualification: '', profession: '', annual_income: '',
+  family_type: 'joint', father_occupation: '', mother_occupation: '', siblings_count: '0',
+  contact_name: '', contact_type: 'father', contact_mobile: '',
+}
+
 export default function Register() {
-  const { signup, login } = useAuth()
+  const { signup } = useAuth()
+  const { t } = useLang()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    email: '', password: '', confirmPassword: '',
-    name: '', gender: '', date_of_birth: '', height_cm: '', marital_status: 'never_married',
-    mother_tongue: 'Marathi', religion: 'Hindu', community: '', city: '', about_me: '',
-    qualification: '', profession: '', annual_income: '',
-    family_type: 'joint', father_occupation: '', mother_occupation: '', siblings_count: '0',
-  })
+  const [form, setForm] = useState(EMPTY_FORM)
+
+  useEffect(() => {
+    if (searchParams.get('debug') === '1') {
+      setForm(DEBUG_DATA)
+    }
+  }, [])
+
+  const STEPS = [
+    t('register', 'stepAccount'),
+    t('register', 'stepPersonal'),
+    t('register', 'stepEducation'),
+    t('register', 'stepFamily'),
+  ]
 
   function set(key, value) { setForm((f) => ({ ...f, [key]: value })) }
 
@@ -29,7 +72,7 @@ export default function Register() {
     setLoading(true)
     try {
       await signup(form.email, form.password, form.name)
-      toast.success('Account created! Please verify your email, then log in.')
+      toast.success(t('register', 'emailVerifyNote'))
       navigate('/login')
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Registration failed')
@@ -48,13 +91,18 @@ export default function Register() {
     else handleFinish()
   }
 
+  const qualifications = t('register', 'qualifications')
+  const incomes = t('register', 'incomes')
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary-50 to-saffron-50">
       <div className="card w-full max-w-lg p-8 page-enter">
         <div className="text-center mb-6">
           <span className="text-4xl">🪷</span>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2">Create Your Profile</h1>
-          <p className="text-gray-500 text-sm">Step {step + 1} of {STEPS.length}: {STEPS[step]}</p>
+          <h1 className="text-2xl font-bold text-gray-800 mt-2">{t('register', 'title')}</h1>
+          <p className="text-gray-500 text-sm">
+            {t('register', 'stepLabel')} {step + 1} {t('register', 'stepOf')} {STEPS.length}: {STEPS[step]}
+          </p>
         </div>
 
         {/* Progress bar */}
@@ -74,20 +122,20 @@ export default function Register() {
           {step === 0 && (
             <>
               <div>
-                <label className="label">Full Name</label>
-                <input className="input" value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="Your full name" />
+                <label className="label">{t('register', 'fullName')}</label>
+                <input className="input" value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder={t('register', 'fullNamePlaceholder')} />
               </div>
               <div>
-                <label className="label">Email Address</label>
-                <input type="email" className="input" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder="your@email.com" />
+                <label className="label">{t('register', 'email')}</label>
+                <input type="email" className="input" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder={t('register', 'emailPlaceholder')} />
               </div>
               <div>
-                <label className="label">Password</label>
-                <input type="password" className="input" value={form.password} onChange={(e) => set('password', e.target.value)} required placeholder="Min 8 characters" minLength={8} />
+                <label className="label">{t('register', 'password')}</label>
+                <input type="password" className="input" value={form.password} onChange={(e) => set('password', e.target.value)} required placeholder={t('register', 'passwordPlaceholder')} minLength={8} />
               </div>
               <div>
-                <label className="label">Confirm Password</label>
-                <input type="password" className="input" value={form.confirmPassword} onChange={(e) => set('confirmPassword', e.target.value)} required placeholder="Repeat password" />
+                <label className="label">{t('register', 'confirmPassword')}</label>
+                <input type="password" className="input" value={form.confirmPassword} onChange={(e) => set('confirmPassword', e.target.value)} required placeholder={t('register', 'confirmPasswordPlaceholder')} />
               </div>
             </>
           )}
@@ -97,54 +145,54 @@ export default function Register() {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Gender</label>
+                  <label className="label">{t('register', 'gender')}</label>
                   <select className="input" value={form.gender} onChange={(e) => set('gender', e.target.value)} required>
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('register', 'selectGender')}</option>
+                    <option value="male">{t('register', 'male')}</option>
+                    <option value="female">{t('register', 'female')}</option>
+                    <option value="other">{t('common', 'other')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="label">Marital Status</label>
+                  <label className="label">{t('register', 'maritalStatus')}</label>
                   <select className="input" value={form.marital_status} onChange={(e) => set('marital_status', e.target.value)}>
-                    <option value="never_married">Never Married</option>
-                    <option value="divorced">Divorced</option>
-                    <option value="widowed">Widowed</option>
-                    <option value="awaiting_divorce">Awaiting Divorce</option>
+                    <option value="never_married">{t('register', 'neverMarried')}</option>
+                    <option value="divorced">{t('register', 'divorced')}</option>
+                    <option value="widowed">{t('register', 'widowed')}</option>
+                    <option value="awaiting_divorce">{t('register', 'awaitingDivorce')}</option>
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Date of Birth</label>
+                  <label className="label">{t('register', 'dateOfBirth')}</label>
                   <input type="date" className="input" value={form.date_of_birth} onChange={(e) => set('date_of_birth', e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]} />
                 </div>
                 <div>
-                  <label className="label">Height (cm)</label>
-                  <input type="number" className="input" value={form.height_cm} onChange={(e) => set('height_cm', e.target.value)} placeholder="e.g. 165" min={100} max={250} />
+                  <label className="label">{t('register', 'height')}</label>
+                  <input type="number" className="input" value={form.height_cm} onChange={(e) => set('height_cm', e.target.value)} placeholder={t('register', 'heightPlaceholder')} min={100} max={250} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Religion</label>
+                  <label className="label">{t('register', 'religion')}</label>
                   <input className="input" value={form.religion} onChange={(e) => set('religion', e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Community / Caste</label>
+                  <label className="label">{t('register', 'community')}</label>
                   <select className="input" value={form.community} onChange={(e) => set('community', e.target.value)}>
-                    <option value="">Select</option>
+                    <option value="">{t('common', 'select')}</option>
                     {COMMUNITIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="label">City / Village</label>
-                <input className="input" value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="e.g. Junnar, Narayangaon…" />
+                <label className="label">{t('register', 'city')}</label>
+                <input className="input" value={form.city} onChange={(e) => set('city', e.target.value)} placeholder={t('register', 'cityPlaceholder')} />
               </div>
               <div>
-                <label className="label">About Me</label>
-                <textarea className="input" rows={3} value={form.about_me} onChange={(e) => set('about_me', e.target.value)} placeholder="Write a brief introduction…" />
+                <label className="label">{t('register', 'aboutMe')}</label>
+                <textarea className="input" rows={3} value={form.about_me} onChange={(e) => set('about_me', e.target.value)} placeholder={t('register', 'aboutMePlaceholder')} />
               </div>
             </>
           )}
@@ -153,21 +201,25 @@ export default function Register() {
           {step === 2 && (
             <>
               <div>
-                <label className="label">Highest Qualification</label>
+                <label className="label">{t('register', 'qualification')}</label>
                 <select className="input" value={form.qualification} onChange={(e) => set('qualification', e.target.value)}>
-                  <option value="">Select</option>
-                  {['10th Pass', '12th Pass', 'Diploma', 'Bachelor\'s Degree', 'Master\'s Degree', 'PhD', 'Other'].map(q => <option key={q} value={q}>{q}</option>)}
+                  <option value="">{t('common', 'select')}</option>
+                  {qualifications.map((q, i) => (
+                    <option key={i} value={['10th Pass', '12th Pass', 'Diploma', "Bachelor's Degree", "Master's Degree", 'PhD', 'Other'][i]}>{q}</option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className="label">Profession / Occupation</label>
-                <input className="input" value={form.profession} onChange={(e) => set('profession', e.target.value)} placeholder="e.g. Software Engineer, Farmer…" />
+                <label className="label">{t('register', 'profession')}</label>
+                <input className="input" value={form.profession} onChange={(e) => set('profession', e.target.value)} placeholder={t('register', 'professionPlaceholder')} />
               </div>
               <div>
-                <label className="label">Annual Income</label>
+                <label className="label">{t('register', 'annualIncome')}</label>
                 <select className="input" value={form.annual_income} onChange={(e) => set('annual_income', e.target.value)}>
-                  <option value="">Prefer not to say</option>
-                  {['Below ₹2 Lakh', '₹2–5 Lakh', '₹5–10 Lakh', '₹10–20 Lakh', 'Above ₹20 Lakh'].map(i => <option key={i} value={i}>{i}</option>)}
+                  <option value="">{t('common', 'preferNotToSay')}</option>
+                  {incomes.map((inc, i) => (
+                    <option key={i} value={['Below ₹2 Lakh', '₹2–5 Lakh', '₹5–10 Lakh', '₹10–20 Lakh', 'Above ₹20 Lakh'][i]}>{inc}</option>
+                  ))}
                 </select>
               </div>
             </>
@@ -177,29 +229,55 @@ export default function Register() {
           {step === 3 && (
             <>
               <div>
-                <label className="label">Family Type</label>
+                <label className="label">{t('register', 'familyType')}</label>
                 <select className="input" value={form.family_type} onChange={(e) => set('family_type', e.target.value)}>
-                  <option value="joint">Joint Family</option>
-                  <option value="nuclear">Nuclear Family</option>
-                  <option value="extended">Extended Family</option>
+                  <option value="joint">{t('register', 'joint')}</option>
+                  <option value="nuclear">{t('register', 'nuclear')}</option>
+                  <option value="extended">{t('register', 'extended')}</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Father's Occupation</label>
+                  <label className="label">{t('register', 'fatherOccupation')}</label>
                   <input className="input" value={form.father_occupation} onChange={(e) => set('father_occupation', e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Mother's Occupation</label>
+                  <label className="label">{t('register', 'motherOccupation')}</label>
                   <input className="input" value={form.mother_occupation} onChange={(e) => set('mother_occupation', e.target.value)} />
                 </div>
               </div>
               <div>
-                <label className="label">Number of Siblings</label>
+                <label className="label">{t('register', 'siblings')}</label>
                 <input type="number" className="input" value={form.siblings_count} onChange={(e) => set('siblings_count', e.target.value)} min={0} max={20} />
               </div>
+
+              {/* Contact for communication */}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium text-gray-700">{t('register', 'contactSection')}</p>
+                <div>
+                  <label className="label">{t('register', 'contactName')}</label>
+                  <input className="input" value={form.contact_name} onChange={(e) => set('contact_name', e.target.value)} placeholder={t('register', 'contactNamePlaceholder')} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">{t('register', 'relation')}</label>
+                    <select className="input" value={form.contact_type} onChange={(e) => set('contact_type', e.target.value)}>
+                      <option value="father">{t('register', 'father')}</option>
+                      <option value="mother">{t('register', 'mother')}</option>
+                      <option value="brother">{t('register', 'brother')}</option>
+                      <option value="uncle">{t('register', 'uncle')}</option>
+                      <option value="aunt">{t('register', 'aunt')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">{t('register', 'mobile')}</label>
+                    <input type="tel" className="input" value={form.contact_mobile} onChange={(e) => set('contact_mobile', e.target.value)} placeholder={t('register', 'mobilePlaceholder')} />
+                  </div>
+                </div>
+              </div>
+
               <p className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                After registration, please verify your email. Your profile will be reviewed by our team before it goes live.
+                {t('register', 'emailVerifyNote')}
               </p>
             </>
           )}
@@ -207,18 +285,22 @@ export default function Register() {
           <div className="flex gap-3 pt-2">
             {step > 0 && (
               <button type="button" onClick={() => setStep((s) => s - 1)} className="btn-secondary flex-1">
-                Back
+                {t('common', 'back')}
               </button>
             )}
             <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? 'Creating…' : step < STEPS.length - 1 ? 'Continue' : 'Create Profile'}
+              {loading
+                ? t('common', 'creating')
+                : step < STEPS.length - 1
+                  ? t('common', 'continue')
+                  : t('register', 'title')}
             </button>
           </div>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Already registered?{' '}
-          <Link to="/login" className="text-primary-600 font-medium hover:underline">Login</Link>
+          {t('register', 'alreadyRegistered')}{' '}
+          <Link to="/login" className="text-primary-600 font-medium hover:underline">{t('register', 'loginLink')}</Link>
         </p>
       </div>
     </div>
